@@ -1,0 +1,97 @@
+Neurona artificial para decidir si una planta necesita riego
+Salida 1 = regar | Salida 0 = no regar
+
+Entradas originales (humedad %, temperatura °C):
+ [[80. 18.]
+ [70. 22.]
+ [65. 28.]
+ [55. 25.]
+ [50. 32.]
+ [40. 30.]
+ [35. 25.]
+ [30. 32.]
+ [20. 35.]
+ [10. 38.]]
+Respuestas esperadas:
+ [0. 0. 0. 0. 0. 1. 1. 1. 1. 1.]
+
+Datos normalizados:
+[[0.8  0.36]
+ [0.7  0.44]
+ [0.65 0.56]
+ [0.55 0.5 ]
+ [0.5  0.64]
+ [0.4  0.6 ]
+ [0.35 0.5 ]
+ [0.3  0.64]
+ [0.2  0.7 ]
+ [0.1  0.76]]
+
+=== Entrenamiento base: tasa=0.5, epocas=10000 ===
+Epoca     0 | error: 0.2468
+Epoca  2000 | error: 0.0497
+Epoca  4000 | error: 0.0350
+Epoca  6000 | error: 0.0275
+Epoca  8000 | error: 0.0229
+
+Peso de la humedad    : -19.5032
+Peso de la temperatura: 2.3101
+Sesgo                 : 7.4022
+Error final           : 0.019645
+
+Probamos lo aprendido:
+Si la salida es >= 0.5 = 1 (regar)
+Si es < 0.5 = 0 (no regar)
+Caso  1 | humedad  80% temp 18°C -> probabilidad 0.001 -> respuesta: 0 (esperada 0)
+Caso  2 | humedad  70% temp 22°C -> probabilidad 0.005 -> respuesta: 0 (esperada 0)
+Caso  3 | humedad  65% temp 28°C -> probabilidad 0.018 -> respuesta: 0 (esperada 0)
+Caso  4 | humedad  55% temp 25°C -> probabilidad 0.103 -> respuesta: 0 (esperada 0)
+Caso  5 | humedad  50% temp 32°C -> probabilidad 0.295 -> respuesta: 0 (esperada 0)
+Caso  6 | humedad  40% temp 30°C -> probabilidad 0.728 -> respuesta: 1 (esperada 1)
+Caso  7 | humedad  35% temp 25°C -> probabilidad 0.850 -> respuesta: 1 (esperada 1)
+Caso  8 | humedad  30% temp 32°C -> probabilidad 0.954 -> respuesta: 1 (esperada 1)
+Caso  9 | humedad  20% temp 35°C -> probabilidad 0.994 -> respuesta: 1 (esperada 1)
+Caso 10 | humedad  10% temp 38°C -> probabilidad 0.999 -> respuesta: 1 (esperada 1)
+
+Signo de los pesos:
+- Peso de humedad negativo : a mayor humedad baja la probabilidad de regar.
+- Peso de temperatura positivo : a mayor temperatura sube la probabilidad de regar.
+
+=== Predicciones con condiciones nuevas (misma escala) ===
+Humedad | Temperatura | Probabilidad | Decision
+    75% |        30°C |       0.0029 | No regar (0)
+    45% |        34°C |       0.5490 | Regar (1)
+    25% |        22°C |       0.9719 | Regar (1)
+    50% |        25°C |       0.2325 | No regar (0)
+    30% |        40°C |       0.9677 | Regar (1)
+
+=== Experimentos ===
+Prueba                Tasa Epocas  Error final  Aciertos  P(45%,34C)
+Prueba base            0.5  10000     0.019645     10/10      0.5490
+Pocas epocas           0.5    100     0.165623     10/10      0.5217
+Cantidad intermedia    0.5   1000     0.067481     10/10      0.5793
+Mas epocas             0.5  20000     0.011705     10/10      0.5263
+Tasa pequena          0.01  10000     0.130048     10/10      0.5388
+Tasa moderada          0.1  10000     0.049728     10/10      0.5853
+Tasa alta              1.0  10000     0.011705     10/10      0.5263
+Tasa muy alta          2.0  10000     0.006566     10/10      0.5082
+
+=== Umbrales sobre la neurona base (sin reentrenar) ===
+Pesos y sesgo se mantienen: [-19.5032   2.3101] 7.4022
+Dato              Humedad  Temp    Prob u=0.4 u=0.5 u=0.6
+entrenamiento 1       80%   18C  0.0006 0   0   0
+entrenamiento 2       70%   22C  0.0053 0   0   0
+entrenamiento 3       65%   28C  0.0183 0   0   0
+entrenamiento 4       55%   25C  0.1025 0   0   0
+entrenamiento 5       50%   32C  0.2951 0   0   0
+entrenamiento 6       40%   30C  0.7285 1   1   1
+entrenamiento 7       35%   25C  0.8496 1   1   1
+entrenamiento 8       30%   32C  0.9539 1   1   1
+entrenamiento 9       20%   35C  0.9941 1   1   1
+entrenamiento 10      10%   38C  0.9993 1   1   1
+nuevo 1               75%   30C  0.0029 0   0   0
+nuevo 2               45%   34C  0.5490 1   1   0  <- cambia
+nuevo 3               25%   22C  0.9719 1   1   1
+nuevo 4               50%   25C  0.2325 0   0   0
+nuevo 5               30%   40C  0.9677 1   1   1
+Casos que cambian de decision: ['nuevo 2']
